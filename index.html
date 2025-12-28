@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Preparation Guide - Home</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.85;
+            font-style: italic;
+        }
+
+        .content {
+            padding: 50px 30px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .welcome-section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .welcome-section p {
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.8;
+            max-width: 700px;
+            margin: 0 auto 20px;
+        }
+
+        .courses-section {
+            margin-bottom: 40px;
+        }
+
+        .courses-title {
+            text-align: center;
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .course-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .card-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            font-size: 0.95em;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .card-body {
+            padding: 25px 20px;
+        }
+
+        .card-text {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .course-btn {
+            width: 100%;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .course-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .course-btn:active {
+            transform: scale(0.98);
+        }
+
+        .features-section {
+            background: #f8f9fa;
+            padding: 40px 30px;
+            border-radius: 15px;
+            margin-top: 40px;
+        }
+
+        .features-title {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .feature-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 12px;
+        }
+
+        .feature-title {
+            color: #667eea;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-text {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .footer p {
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .footer-highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .header p {
+                font-size: 1em;
+            }
+
+            .buttons-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .courses-title {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📚 Interview Preparation Guide</h1>
+            <p>Master the Concepts, Excel in Your Interviews</p>
+            <p class="subtitle">Interactive learning modules for software engineering interviews</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h2>Welcome to Your Learning Journey! 🚀</h2>
+                <p>
+                    This interactive platform provides comprehensive learning modules designed to help you prepare for software engineering interviews. Each course covers essential topics with interactive content, quizzes, and real-world examples.
+                </p>
+                <p>
+                    Select a course below to get started and enhance your knowledge in key areas of software development and system design!
+                </p>
+            </div>
+
+            <!-- Courses Section -->
+            <div class="courses-section">
+                <h3 class="courses-title">Choose Your Learning Path</h3>
+                
+                <div class="buttons-grid">
+                    <!-- Agile Methodology Button -->
+                    <div class="course-card">
+                        <div class="card-header">
+                            <div class="card-icon">🚀</div>
+                            <h3 class="card-title">Agile Methodology</h3>
+                            <p class="card-description">Project Management & Development</p>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                Learn agile principles, Scrum framework, Kanban, and best practices for modern software development. Master project management techniques used by top companies.
+                            </p>
+                            <button class="course-btn" onclick="openPresentation('agile-presentation.html')">
+                                Start Learning →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Microservices Button -->
+                    <div class="course-card">
+                        <div class="card-header">
+                            <div class="card-icon">🏗️</div>
+                            <h3 class="card-title">Microservices</h3>
+                            <p class="card-description">Architecture & System Design</p>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                Understand microservices architecture, SOA, REST APIs, and distributed systems. Learn how to design scalable and maintainable applications.
+                            </p>
+                            <button class="course-btn" onclick="openPresentation('microservices-presentation.html')">
+                                Start Learning →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- System Design Button -->
+                    <div class="course-card">
+                        <div class="card-header">
+                            <div class="card-icon">⚙️</div>
+                            <h3 class="card-title">System Design</h3>
+                            <p class="card-description">Advanced Architecture Concepts</p>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                Master system design fundamentals including scalability, latency, throughput, consistency, availability, and caching strategies.
+                            </p>
+                            <button class="course-btn" onclick="openPresentation('System-design.html')">
+                                Start Learning →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="features-section">
+                <h3 class="features-title">What Makes This Guide Special? ✨</h3>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">🎓</div>
+                        <h4 class="feature-title">Interactive Content</h4>
+                        <p class="feature-text">Learn through engaging interactive presentations, quizzes, and activities that make concepts stick.</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">🧠</div>
+                        <h4 class="feature-title">Knowledge Check</h4>
+                        <p class="feature-text">Test your understanding with comprehensive quizzes and get immediate feedback on your answers.</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">💡</div>
+                        <h4 class="feature-title">Interview Tips</h4>
+                        <p class="feature-text">Get expert tips and real interview questions to help you ace your technical interviews.</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <h4 class="feature-title">Real Examples</h4>
+                        <p class="feature-text">Learn through practical examples and case studies from real-world applications.</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <h4 class="feature-title">Self-Paced</h4>
+                        <p class="feature-text">Learn at your own pace. Go through modules multiple times to solidify your understanding.</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">🔄</div>
+                        <h4 class="feature-title">Regular Updates</h4>
+                        <p class="feature-text">Content is continuously updated to include latest industry trends and interview questions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>🎯 <span class="footer-highlight">Interview Preparation Guide</span> - Your Path to Success</p>
+            <p>Master the concepts, practice consistently, and excel in your technical interviews!</p>
+            <p style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">© 2025 Interview Preparation Platform. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // Function to open presentation
+        function openPresentation(filename) {
+            window.location.href = filename;
+        }
+
+        // Add smooth scroll behavior
+        document.documentElement.style.scrollBehavior = 'smooth';
+    </script>
+</body>
+</html>
