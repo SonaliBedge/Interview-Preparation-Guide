@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Design Master Course</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: clamp(20px, 5vw, 32px); margin-bottom: 10px; }
+        .progress-container {
+            background: rgba(255, 255, 255, 0.2);
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .content { padding: 20px; min-height: 400px; max-height: 60vh; overflow-y: auto; }
+        .slide { display: none; animation: fadeIn 0.5s; }
+        .slide.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        h2 { color: #667eea; margin-bottom: 15px; font-size: clamp(18px, 4vw, 26px); }
+        h3 { color: #764ba2; margin: 15px 0 10px; font-size: clamp(16px, 3vw, 20px); }
+        p, li { line-height: 1.6; color: #333; margin-bottom: 10px; font-size: clamp(14px, 2.5vw, 16px); }
+        .code { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 8px; overflow-x: auto; margin: 10px 0; font-family: monospace; font-size: clamp(12px, 2vw, 14px); }
+        .box { background: #f8f9fa; border-left: 4px solid #667eea; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .quiz { background: #f0f4ff; padding: 15px; border-radius: 10px; margin: 15px 0; }
+        .quiz-q { font-weight: bold; margin-bottom: 10px; }
+        .opt { background: white; padding: 10px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; margin: 8px 0; transition: all 0.3s; }
+        .opt:hover { border-color: #667eea; transform: translateX(5px); }
+        .opt.correct { background: #d4edda; border-color: #28a745; }
+        .opt.incorrect { background: #f8d7da; border-color: #dc3545; }
+        .feedback { margin-top: 10px; padding: 10px; border-radius: 8px; display: none; }
+        .feedback.show { display: block; }
+        .feedback.correct { background: #d4edda; color: #155724; }
+        .feedback.incorrect { background: #f8d7da; color: #721c24; }
+        .nav { display: flex; justify-content: space-between; padding: 20px; background: #f8f9fa; gap: 10px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 25px; cursor: pointer; font-size: clamp(14px, 2.5vw, 16px); font-weight: bold; transition: all 0.3s; flex: 1; min-width: 100px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: #6c757d; color: white; }
+        ul { margin-left: 20px; }
+        .highlight { background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>System Design Interview Prep</h1>
+            <p>Interactive Learning Journey</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+        </div>
+        <div class="content" id="content"></div>
+        <div class="nav">
+            <button class="btn btn-secondary" id="prev" onclick="nav(-1)">← Prev</button>
+            <button class="btn btn-primary" id="next" onclick="nav(1)">Next →</button>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let current = 0;
+        let scores = [];
+        
+        const slides = [
+            {
+                title: "Welcome! 🚀",
+                content: `
+                    <p><strong>Master 17 System Design Topics</strong></p>
+                    <div class="box">
+                        <p><strong>What You'll Learn:</strong></p>
+                        <ul>
+                            <li>Storage Systems & Databases</li>
+                            <li>Scalability Patterns</li>
+                            <li>Authentication & Security</li>
+                            <li>Real System Designs</li>
+                        </ul>
+                    </div>
+                    <div class="highlight">
+                        <p>✨ <strong>Interactive quizzes</strong> after each topic</p>
+                        <p>📱 <strong>Fully responsive</strong> - works on all devices</p>
+                        <p>🎯 <strong>Interview-focused</strong> - real questions & answers</p>
+                    </div>
+                `
+            },
+            {
+                title: "1. File-Based Storage",
+                content: `
+                    <p>Storing data directly in files without a database.</p>
+                    <div class="box">
+                        <strong>How it works:</strong><br>
+                        Data saved in files (JSON, CSV, XML) → Read/write directly from filesystem
+                    </div>
+                    <div class="code">// Example
+const fs = require('fs');
+const data = { name: "Sonali", role: "Dev" };
+fs.writeFileSync('data.json', 
+  JSON.stringify(data));</div>
+                    <h3>Pros & Cons</h3>
+                    <p>✅ Simple, Fast for small data, No setup needed</p>
+                    <p>❌ No ACID, Poor concurrency, Hard to query, Doesn't scale</p>
+                    <div class="highlight">
+                        <strong>Use when:</strong> Config files, logs, small apps (&lt;10K records)
+                    </div>
+                `,
+                quiz: {
+                    q: "Which is BEST for file-based storage?",
+                    opts: ["Banking with millions of transactions", "Social media platform", "App configuration file", "E-commerce site"],
+                    correct: 2,
+                    explain: "Configuration files are perfect for file-based storage - small, simple, rarely changed. Complex apps with transactions need real databases."
+                }
+            },
+            {
+                title: "2. RDBMS Horizontal Scaling",
+                content: `
+                    <p>Adding more servers to distribute load (vs vertical = bigger server)</p>
+                    <h3>Techniques:</h3>
+                    <div class="box">
+                        <strong>1. Replication (Master-Slave)</strong><br>
+                        Master handles writes → Slaves handle reads<br>
+                        ✅ Better read performance ⚠️ Eventual consistency
+                    </div>
+                    <div class="box">
+                        <strong>2. Sharding</strong><br>
+                        Split data across DBs by shard key (e.g., userID % 4)<br>
+                        ✅ Distributes reads & writes ⚠️ Complex queries
+                    </div>
+                    <div class="box">
+                        <strong>3. Federation</strong><br>
+                        Separate DBs by function (Users DB, Orders DB, Products DB)<br>
+                        ✅ Independent scaling ⚠️ Cross-DB joins difficult
+                    </div>
+                    <div class="code">// Sharding example
+function getShard(userID) {
+  return userID % 4; // 4 shards
+}
+// User 100 → Shard 0
+// User 101 → Shard 1</div>
+                `,
+                quiz: {
+                    q: "For a read-heavy app with few writes, which is best?",
+                    opts: ["Vertical scaling", "Master-Slave replication", "Sharding", "Federation"],
+                    correct: 1,
+                    explain: "Master-Slave replication is perfect for read-heavy workloads. Master handles writes, multiple slaves handle reads, distributing the load."
+                }
+            },
+            {
+                title: "3. NoSQL Database Types",
+                content: `
+                    <h3>1. Document DB (MongoDB)</h3>
+                    <div class="code">{ 
+  name: "Sonali",
+  skills: ["Python", "React"],
+  projects: [{name: "MyFriendBen"}]
+}</div>
+                    <p><strong>Use:</strong> Flexible schema, nested data</p>
+                    
+                    <h3>2. Key-Value (Redis, DynamoDB)</h3>
+                    <div class="code">user:123 → { name: "Sonali" }
+session:abc → { userId: 123 }</div>
+                    <p><strong>Use:</strong> Caching, sessions, fast lookups</p>
+                    
+                    <h3>3. Column-Family (Cassandra)</h3>
+                    <div class="code">Row: user_123
+profile:name → "Sonali"
+activity:logins → "1000"</div>
+                    <p><strong>Use:</strong> Time-series, analytics</p>
+                    
+                    <h3>4. Graph (Neo4j)</h3>
+                    <div class="code">(Sonali)-[:WORKS_AT]->(Code The Dream)
+(Sonali)-[:BUILT]->(MyFriendBen)</div>
+                    <p><strong>Use:</strong> Social networks, recommendations</p>
+                `,
+                quiz: {
+                    q: "Best for modeling social network friendships?",
+                    opts: ["Document DB", "Key-Value", "Column-Family", "Graph DB"],
+                    correct: 3,
+                    explain: "Graph databases excel at relationships. They're designed for queries like 'find friends of friends' which are common in social networks."
+                }
+            },
+            {
+                title: "4. Polyglot Persistence",
+                content: `
+                    <p><strong>Use different databases for different needs in the same app!</strong></p>
+                    <div class="box">
+                        <strong>E-commerce Example:</strong><br>
+                        🔹 PostgreSQL: User accounts, orders (ACID needed)<br>
+                        🔹 MongoDB: Product catalog (flexible schema)<br>
+                        🔹 Redis: Shopping cart (fast, temporary)<br>
+                        🔹 Elasticsearch: Product search<br>
+                        🔹 Neo4j: Recommendations
+                    </div>
+                    <h3>Benefits</h3>
+                    <p>✅ Optimized for each use case<br>
+                    ✅ Independent scaling<br>
+                    ✅ Best tool for each job</p>
+                    <h3>Challenges</h3>
+                    <p>⚠️ More complexity<br>
+                    ⚠️ Data consistency across systems<br>
+                    ⚠️ Multiple databases to maintain</p>
+                    <div class="highlight">
+                        <strong>Principle:</strong> "Right tool for the right job"
+                    </div>
+                `,
+                quiz: {
+                    q: "For a blog platform, which DB for user authentication?",
+                    opts: ["MongoDB (flexible)", "Redis (fast)", "PostgreSQL (ACID)", "Elasticsearch (search)"],
+                    correct: 2,
+                    explain: "Authentication requires strong consistency and ACID properties to prevent security issues. PostgreSQL guarantees data integrity."
+                }
+            },
+            {
+                title: "5. Denormalization",
+                content: `
+                    <p>Adding redundancy to improve read performance (opposite of normalization)</p>
+                    <h3>Example:</h3>
+                    <div class="box">
+                        <strong>Normalized:</strong> Users table + Orders table (JOIN needed)<br>
+                        <strong>Denormalized:</strong> Orders table includes user_name (no JOIN!)
+                    </div>
+                    <div class="code">-- Normalized (slow)
+SELECT u.name, o.total
+FROM users u
+JOIN orders o ON u.id = o.user_id
+
+-- Denormalized (fast)
+SELECT user_name, total
+FROM orders</div>
+                    <h3>When to Use</h3>
+                    <p>✅ Read-heavy workloads<br>
+                    ✅ JOINs causing slow queries<br>
+                    ✅ Analytics/reporting</p>
+                    <h3>Trade-offs</h3>
+                    <p>✅ Faster reads<br>
+                    ❌ More storage<br>
+                    ❌ Complex updates<br>
+                    ❌ Risk of inconsistency</p>
+                `,
+                quiz: {
+                    q: "Analytics dashboard runs every second with 3-table JOINs. Best approach?",
+                    opts: ["Add redundant columns", "Materialized view", "Keep normalized", "Move to NoSQL"],
+                    correct: 1,
+                    explain: "Materialized view pre-computes the join and stores results. Perfect for dashboards - fast queries with periodic refresh."
+                }
+            },
+            {
+                title: "6. Database Indexing",
+                content: `
+                    <p>Like a book's index - jump directly to data instead of scanning everything!</p>
+                    <div class="box">
+                        <strong>Without Index:</strong> Scan all rows (slow)<br>
+                        <strong>With Index:</strong> Direct lookup (fast)<br>
+                        O(n) → O(log n)
+                    </div>
+                    <div class="code">-- Create index
+CREATE INDEX idx_email 
+ON users(email);
+
+-- Query uses index (fast!)
+SELECT * FROM users 
+WHERE email = 'sonali@example.com';</div>
+                    <h3>When to Index</h3>
+                    <p>✅ WHERE clauses<br>
+                    ✅ JOIN conditions<br>
+                    ✅ ORDER BY columns<br>
+                    ❌ Small tables<br>
+                    ❌ Frequently updated columns</p>
+                    <h3>Composite Index</h3>
+                    <div class="code">CREATE INDEX idx_user_date 
+ON orders(user_id, order_date);
+
+-- Uses index
+WHERE user_id = 1 AND order_date > '2024-01-01'
+-- Doesn't use index (skips first column)
+WHERE order_date > '2024-01-01'</div>
+                `,
+                quiz: {
+                    q: "Index on (user_id, created_at). Which query WON'T use it efficiently?",
+                    opts: ["WHERE user_id = 5", "WHERE user_id = 5 AND created_at > '2024-01-01'", "WHERE created_at > '2024-01-01'", "WHERE user_id = 5 ORDER BY created_at"],
+                    correct: 2,
+                    explain: "Composite indexes work left-to-right. Querying only created_at skips the first column (user_id), so the index can't be used efficiently."
+                }
+            },
+            {
+                title: "7. Sync vs Async",
+                content: `
+                    <h3>Synchronous</h3>
+                    <p>Client waits for response (blocking)</p>
+                    <div class="code">// Sync: Wait for result
+const user = await getUser(123);
+console.log(user); // Waits here</div>
+                    <p><strong>Use:</strong> Login, data fetch, fast operations</p>
+                    
+                    <h3>Asynchronous</h3>
+                    <p>Client doesn't wait (non-blocking)</p>
+                    <div class="code">// Async: Don't wait
+async function register(user) {
+  await db.create(user);
+  queue.add('send-email', user); 
+  return { success: true }; 
+  // Email sends in background!
+}</div>
+                    <p><strong>Use:</strong> Emails, file processing, long tasks</p>
+                    
+                    <div class="highlight">
+                        <strong>Rule:</strong> If user needs immediate result → Sync<br>
+                        If task takes time → Async
+                    </div>
+                `,
+                quiz: {
+                    q: "Video sharing site: user uploads 2GB video. Which should be async?",
+                    opts: ["Only transcoding", "Transcoding, thumbnails, notifications", "Only metadata save", "None - all sync"],
+                    correct: 1,
+                    explain: "All heavy operations should be async: transcoding, thumbnail generation, notifications. User gets immediate upload confirmation while processing happens in background."
+                }
+            },
+            {
+                title: "8. Message Queues",
+                content: `
+                    <p>Enable async communication via queues (RabbitMQ, AWS SQS, Redis)</p>
+                    <div class="box">
+                        Producer → Message Queue → Consumer
+                    </div>
+                    <div class="code">// Producer sends
+queue.send({
+  event: 'user.registered',
+  userId: 123,
+  email: 'user@example.com'
+});
+
+// Consumer processes
+queue.subscribe('user.registered', 
+  async (msg) => {
+    await sendEmail(msg.email);
+  }
+);</div>
+                    <h3>Patterns</h3>
+                    <p><strong>Point-to-Point:</strong> One message → One consumer<br>
+                    <strong>Pub/Sub:</strong> One message → Multiple consumers</p>
+                    <h3>Benefits</h3>
+                    <p>✅ Decoupling services<br>
+                    ✅ Scalability<br>
+                    ✅ Reliability (persists messages)<br>
+                    ✅ Load leveling</p>
+                `,
+                quiz: {
+                    q: "Consumer crashes while processing. What happens to message?",
+                    opts: ["Lost forever", "Returns to queue for retry", "All messages deleted", "Producer notified"],
+                    correct: 1,
+                    explain: "Message queues ensure reliability. If consumer crashes, message returns to queue and another consumer can process it. This is 'at-least-once delivery'."
+                }
+            },
+            {
+                title: "9. Auth vs Authorization",
+                content: `
+                    <h3>Authentication (WHO are you?)</h3>
+                    <p>Proving identity (login)</p>
+                    <div class="code">async function login(email, password) {
+  const user = await db.findByEmail(email);
+  const valid = await bcrypt.compare(
+    password, user.hashedPassword);
+  if (!valid) throw Error('Invalid');
+  return generateToken(user);
+}</div>
+                    
+                    <h3>Authorization (WHAT can you do?)</h3>
+                    <p>Checking permissions (after auth)</p>
+                    <div class="code">async function deletePost(userId, postId) {
+  const post = await db.posts.find(postId);
+  if (post.authorId !== userId) {
+    throw Error('Unauthorized');
+  }
+  await db.posts.delete(postId);
+}</div>
+                    
+                    <div class="highlight">
+                        <strong>Remember:</strong><br>
+                        Authentication → Login (who?)<br>
+                        Authorization → Permissions (what?)
+                    </div>
+                `,
+                quiz: {
+                    q: "User logs in successfully but can't delete someone else's post. What failed?",
+                    opts: ["Authentication", "Authorization", "Both", "Neither - this is correct"],
+                    correct: 3,
+                    explain: "This is correct behavior! Authentication succeeded (user logged in). Authorization correctly denied access to delete someone else's post."
+                }
+            },
+            {
+                title: "10. Token-Based Auth",
+                content: `
+                    <p>Most common auth for APIs - uses JWT (JSON Web Tokens)</p>
+                    <h3>Flow</h3>
+                    <p>1. User logs in → Server generates token<br>
+                    2. Client stores token<br>
+                    3. Client sends token with each request<br>
+                    4. Server verifies token</p>
+                    <div class="code">// 1. Login - generate token
+const token = jwt.sign(
+  { userId: 123, email: 'user@example.com' },
+  SECRET_KEY,
+  { expiresIn: '24h' }
+);
+
+// 2. Client stores & sends
+localStorage.setItem('token', token);
+fetch('/api/profile', {
+  headers: { 
+    'Authorization': \`Bearer \${token}\` 
+  }
+});
+
+// 3. Server verifies
+const decoded = jwt.verify(token, SECRET_KEY);
+req.user = decoded; // { userId: 123, ... }</div>
+                    <h3>Benefits</h3>
+                    <p>✅ Stateless<br>✅ Scalable<br>✅ Cross-domain<br>✅ Mobile-friendly</p>
+                `,
+                quiz: {
+                    q: "Access token expired during form fill. Best approach?",
+                    opts: ["Force re-login", "Auto-refresh with refresh token", "Extend expiry to 30 days", "Remove expiration"],
+                    correct: 1,
+                    explain: "Use refresh token to get new access token automatically. Maintains security (short-lived access tokens) with good UX (no re-login needed)."
+                }
+            },
+            {
+                title: "11. OAuth 2.0",
+                content: `
+                    <p>Let apps access your data without sharing passwords (e.g., "Sign in with Google")</p>
+                    <h3>Flow</h3>
+                    <p>1. Click "Sign in with Google"<br>
+                    2. Redirect to Google login<br>
+                    3. User approves access<br>
+                    4. Google sends auth code<br>
+                    5. App exchanges code for token<br>
+                    6. App uses token to get user data</p>
+                    <div class="code">// 1. Redirect to Google
+window.location = 
+  'https://accounts.google.com/o/oauth2/auth?' +
+  'client_id=...' +
+  'redirect_uri=...' +
+  'scope=profile email';
+
+// 2. Handle callback, exchange code
+const response = await fetch(
+  'https://oauth2.googleapis.com/token',
+  {
+    method: 'POST',
+    body: { code, client_id, client_secret }
+  }
+);
+const { access_token } = await response.json();
+
+// 3. Get user data
+const user = await fetch(
+  'https://googleapis.com/userinfo',
+  { headers: { 
+    'Authorization': \`Bearer \${access_token}\`
+  }}
+);</div>
+                `,
+                quiz: {
+                    q: "What is the authorization code's purpose?",
+                    opts: ["It's the access token", "Exchange it for access token", "Store user passwords", "Display to user"],
+                    correct: 1,
+                    explain: "Authorization code is temporary and exchanged server-side for an access token. This two-step process prevents token exposure in URLs."
+                }
+            },
+            {
+                title: "12. Forward vs Reverse Proxy",
+                content: `
+                    <h3>Forward Proxy</h3>
+                    <p>Client → Proxy → Internet<br>
+                    Acts for CLIENTS (hides client)</p>
+                    <p><strong>Use:</strong> VPN, content filtering, privacy</p>
+                    
+                    <h3>Reverse Proxy</h3>
+                    <p>Client → Proxy → Backend Servers<br>
+                    Acts for SERVERS (hides servers)</p>
+                    <p><strong>Use:</strong> Load balancing, SSL, caching</p>
+                    
+                    <div class="box">
+                        <strong>Example: Nginx Reverse Proxy</strong>
+                        <div class="code">upstream backend {
+  server app1:3000;
+  server app2:3000;
+}
+server {
+  listen 80;
+  location / {
+    proxy_pass http://backend;
+  }
+}</div>
+                    </div>
+                    <div class="highlight">
+                        <strong>Remember:</strong><br>
+                        Forward = For Clients<br>
+                        Reverse = For Servers
+                    </div>
+                `,
+                quiz: {
+                    q: "Company blocks social media via proxy that logs traffic. Which type?",
+                    opts: ["Reverse", "Forward", "Load Balancer", "CDN"],
+                    correct: 1,
+                    explain: "Forward proxy sits between employees and internet, controlling outbound traffic. Perfect for filtering and monitoring."
+                }
+            },
+            {
+                title: "13. Reverse Proxy Deep Dive",
+                content: `
+                    <h3>Key Functions</h3>
+                    <div class="box">
+                        <strong>1. Load Balancing</strong><br>
+                        Distribute 1000 req/s across 3 servers → 333 req/s each
+                    </div>
+                    <div class="box">
+                        <strong>2. SSL Termination</strong><br>
+                        Proxy handles HTTPS, backends use HTTP
+                    </div>
+                    <div class="box">
+                        <strong>3. Caching</strong><br>
+                        Store frequent responses, reduce backend load
+                    </div>
+                    <div class="box">
+                        <strong>4. Security</strong><br>
+                        Hide backend IPs, rate limiting, DDoS protection
+                    </div>
+                    <div class="code">// Nginx strategies
+least_conn;  // Send to least busy
+ip_hash;     // Same client → same server
+weight=3;    // More powerful = more traffic</div>
+                `,
+                quiz: {
+                    q: "5 backend servers, Server 1 crashes. What handles this?",
+                    opts: ["SSL Termination", "Health checks route to healthy servers", "Cache serves all requests", "All restart"],
+                    correct: 1,
+                    explain: "Health checks detect failures and automatically route traffic to healthy servers. This ensures high availability with no downtime."
+                }
+            },
+            {
+                title: "14. URL Shortener Design",
+                content: `
+                    <p>Design bit.ly: Long URL → Short URL</p>
+                    <h3>Requirements</h3>
+                    <p>✓ Generate short URLs<br>
+                    ✓ Redirect to original<br>
+                    ✓ Handle millions of URLs<br>
+                    ✓ Fast (&lt;100ms)<br>
+                    ✓ Track clicks</p>
+                    
+                    <h3>Solution</h3>
+                    <div class="code">// Base62 encoding
+function toBase62(num) {
+  const chars = 
+    '0-9a-zA-Z'; // 62 chars
+  let result = '';
+  while (num > 0) {
+    result = chars[num % 62] + result;
+    num = Math.floor(num / 62);
+  }
+  return result;
+}
+// ID 1000000 → "4c92" (7 chars = 3.5T URLs!)</div>
+
+                    <div class="box">
+                        <strong>Architecture:</strong><br>
+                        Load Balancer<br>
+                        → Web Servers<br>
+                        → Redis Cache (hot URLs)<br>
+                        → Database (all mappings)<br>
+                        → Analytics Queue (async)
+                    </div>
+                `,
+                quiz: {
+                    q: "1M redirects/day, 80% hit top 1000 URLs. Best optimization?",
+                    opts: ["Faster database", "Redis cache for popular URLs", "More servers", "Connection pooling"],
+                    correct: 1,
+                    explain: "Redis caching is perfect! 80% of traffic (800K redirects) never hits database. Response time: 50ms → 1ms. Classic 80/20 rule."
+                }
+            },
+            {
+                title: "15. Dropbox System Design",
+                content: `
+                    <p>File storage + sync across devices</p>
+                    <h3>Requirements</h3>
+                    <p>✓ Upload/download files<br>
+                    ✓ Auto-sync across devices<br>
+                    ✓ Share files<br>
+                    ✓ Offline access<br>
+                    ✓ Version history</p>
+                    
+                    <h3>Key Techniques</h3>
+                    <div class="box">
+                        <strong>1. Chunking</strong><br>
+                        Split files into 4MB chunks<br>
+                        Change 5MB in 100MB file → Upload only 2 chunks!
+                    </div>
+                    <div class="box">
+                        <strong>2. Deduplication</strong><br>
+                        Same file uploaded by 100 users → Store once<br>
+                        Use content hash (SHA-256)
+                    </div>
+                    <div class="box">
+                        <strong>3. Delta Sync</strong><br>
+                        Only upload changed chunks
+                    </div>
+                    
+                    <div class="code">// Check which chunks exist
+const response = await api.post(
+  '/check-chunks', 
+  { chunks: chunkHashes }
+);
+// Upload only missing chunks
+const missing = chunks.filter(
+  c => !response.existing.includes(c.hash)
+);
+await uploadChunks(missing);</div>
+                `,
+                quiz: {
+                    q: "100MB video, 5MB change. With 4MB chunks, how much uploads?",
+                    opts: ["100MB (full file)", "5MB (only changed)", "8MB (2 chunks)", "50MB (half file)"],
+                    correct: 2,
+                    explain: "5MB change affects ~2 chunks (4MB each). Only those 2 chunks upload (~8MB), saving 92MB bandwidth!"
+                }
+            },
+            {
+                title: "16. Google Drive Design",
+                content: `
+                    <p>Dropbox + Real-time collaboration!</p>
+                    <h3>Additional Features</h3>
+                    <p>✓ Real-time editing (Docs/Sheets)<br>
+                    ✓ Advanced permissions<br>
+                    ✓ Rich search<br>
+                    ✓ Activity tracking</p>
+                    
+                    <h3>Real-Time Collaboration</h3>
+                    <div class="box">
+                        <strong>Operational Transformation (OT)</strong><br>
+                        Allows simultaneous editing<br>
+                        Transforms conflicting operations
+                    </div>
+                    
+                    <div class="code">// User A: Insert "Hello" at pos 0
+// User B: Insert "World" at pos 0
+// OT transforms operations 
+// → "Hello World" (both preserved!)</div>
+                    
+                    <h3>Permissions</h3>
+                    <div class="code">{
+  ownerId: "user1",
+  permissions: [
+    { userId: "user2", role: "editor" },
+    { userId: "user3", role: "viewer" },
+    { email: "@company.com", 
+      role: "commenter" }
+  ]
+}</div>
+                `,
+                quiz: {
+                    q: "Two users edit same paragraph simultaneously. User A deletes sentence, User B inserts in that sentence. What algorithm?",
+                    opts: ["Last-Write-Wins", "Operational Transformation", "Two-Phase Commit", "Eventual Consistency"],
+                    correct: 1,
+                    explain: "Operational Transformation (OT) transforms concurrent operations so they work together correctly, preserving both users' edits."
+                }
+            },
+            {
+                title: "🎉 Course Complete!",
+                content: `
+                    <div class="highlight">
+                        <h3 style="color: #667eea;">Your Score: <span id="score"></span></h3>
+                    </div>
+                    <h3>You've Mastered:</h3>
+                    <p>✅ Storage systems (File, RDBMS, NoSQL)<br>
+                    ✅ Database concepts (Scaling, indexing, denormalization)<br>
+                    ✅ Communication (Sync/async, message queues, proxies)<br>
+                    ✅ Security (Auth, authorization, OAuth)<br>
+                    ✅ Real systems (URL shortener, Dropbox, Google Drive)</p>
+                    
+                    <div class="box">
+                        <strong>🎯 Interview Tips:</strong><br>
+                        1. Ask clarifying questions first<br>
+                        2. Start with high-level design<br>
+                        3. Think about scale early<br>
+                        4. Discuss trade-offs<br>
+                        5. Know your numbers (latency, throughput)<br>
+                        6. Be honest when unsure
+                    </div>
+                    
+                    <div class="box">
+                        <strong>Next Steps:</strong><br>
+                        • Practice drawing architectures<br>
+                        • Do mock interviews<br>
+                        • Build mini-versions of these systems<br>
+                        • Study real tech blogs (Netflix, Uber)<br>
+                        • Review this presentation!
+                    </div>
+                    
+                    <div class="highlight">
+                        <h3 style="text-align: center;">🌟 You've Got This, Sonali! 🌟</h3>
+                        <p style="text-align: center;">Good luck with your interviews! 🎯</p>
+                    </div>
+                `
+            }
+        ];
+        
+        function render() {
+            const s = slides[current];
+            let html = `<div class="slide active"><h2>${s.title}</h2>${s.content}`;
+            if (s.quiz) {
+                html += `<div class="quiz"><div class="quiz-q">❓ ${s.quiz.q}</div>`;
+                s.quiz.opts.forEach((opt, i) => {
+                    html += `<div class="opt" onclick="check(${i})">${String.fromCharCode(65+i)}. ${opt}</div>`;
+                });
+                html += '<div class="feedback"></div></div>';
+            }
+            html += '</div>';
+            document.getElementById('content').innerHTML = html;
+            document.getElementById('progress').style.width = ((current+1)/slides.length*100) + '%';
+            document.getElementById('prev').disabled = current === 0;
+            document.getElementById('next').textContent = current === slides.length-1 ? 'Finish ✓' : 'Next →';
+            if (current === slides.length-1) updateScore();
+            window.scrollTo(0, 0);
+        }
+        
+        function check(sel) {
+            const s = slides[current].quiz;
+            const opts = document.querySelectorAll('.opt');
+            const fb = document.querySelector('.feedback');
+            opts.forEach((o, i) => {
+                o.style.pointerEvents = 'none';
+                if (i === s.correct) o.classList.add('correct');
+                else if (i === sel) o.classList.add('incorrect');
+            });
+            const ok = sel === s.correct;
+            fb.className = 'feedback show ' + (ok ? 'correct' : 'incorrect');
+            fb.innerHTML = `<strong>${ok ? '✅ Correct!' : '❌ Incorrect'}</strong><br/>${s.explain}`;
+            if (scores[current] === undefined) scores[current] = ok ? 1 : 0;
+        }
+        
+        function nav(dir) {
+            const next = current + dir;
+            if (next >= 0 && next < slides.length) {
+                current = next;
+                render();
+            }
+        }
+        
+        function updateScore() {
+            const total = slides.filter(s => s.quiz).length;
+            const correct = scores.filter(s => s === 1).length;
+            const pct = total > 0 ? Math.round(correct/total*100) : 100;
+            const el = document.getElementById('score');
+            if (el) {
+                el.textContent = `${correct}/${total} (${pct}%)`;
+                if (pct >= 80) el.textContent += ' - Excellent! 🌟';
+                else if (pct >= 60) el.textContent += ' - Good! 👍';
+                else el.textContent += ' - Keep practicing! 💪';
+            }
+        }
+        
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') nav(-1);
+            else if (e.key === 'ArrowRight') nav(1);
+        });
+        
+        render();
+    </script>
+</body>
+</html>
